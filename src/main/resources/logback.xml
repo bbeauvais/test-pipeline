@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+
+<configuration>
+
+	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+		<Target>System.out</Target>
+		<encoder>
+			<pattern>%date [%5level] [%thread] %logger - %msg%ex%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="rollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${catalina.base}/logs/${project.artifactId}.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>${catalina.base}/logs/${project.artifactId}-%d{yyyy-MM-dd}.log.zip</fileNamePattern>
+			<!-- keep n days of history -->
+			<maxHistory>15</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%date [%5level] [%thread] %logger - %msg%ex%n</pattern>
+		</encoder>
+	</appender>
+    
+	<logger name="com.bbeauvais" additivity="false" level="INFO">
+		<appender-ref ref="stdout" />
+		<appender-ref ref="rollingFile" />
+	</logger>
+
+	<root level="WARN">
+		<appender-ref ref="stdout" />
+		<appender-ref ref="rollingFile" />
+	</root>
+</configuration>
