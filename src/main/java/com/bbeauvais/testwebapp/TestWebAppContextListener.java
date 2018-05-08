@@ -7,6 +7,8 @@ import javax.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.bbeauvais.testwebapp.servlet.TestServlet;
+
 @WebListener
 public class TestWebAppContextListener implements ServletContextListener {
 
@@ -21,11 +23,13 @@ public class TestWebAppContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		LOGGER.info("Initialisation des Servlets pour l'application web TestWebApp");
+		
+		sce.getServletContext().addServlet("Servlet", TestServlet.class).addMapping("/hello");
 	}
 
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
-		LOGGER.info("Fermeture de l'application web TestWebApp");
+		LOGGER.info("Fermeture de l'application web TestWebApp {}", sce.getServletContext().getServerInfo());
 	}
 
 	// =========================================================================

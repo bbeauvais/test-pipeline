@@ -7,6 +7,7 @@ pipeline {
 		timeout(time: 1, unit: 'HOURS')
 		skipStagesAfterUnstable()
 		buildDiscarder(logRotator(numToKeepStr : "10"))
+		disableConcurrentBuilds()
 	}
 	environment {
 		VERSION = readMavenPom().getVersion()
@@ -24,6 +25,7 @@ pipeline {
 		stage('Build') {
 			steps {
 				sh 'mvn clean install'
+				sh "ls -R"
 			} 
 			post {
 				always {
@@ -37,7 +39,10 @@ pipeline {
 			} 
 			steps {
 				withSonarQubeEnv('my-sonarqube') {
-					sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.4.0.905:sonar '
+					sh "mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.4.0.905:sonar " +
+						"-Dsonar.projectKey=Test-ci-cd " +
+						"-Dsonar.java.source=1.8 " +
+						"-Dsonar.jacoco.reportPaths=target/jacoco.exec "
 				}
 			}
 		}
@@ -77,11 +82,14 @@ pipeline {
 			options {
                 timeout(time: 15, unit: 'MINUTES') 
             }
+			environment {
+				SERVER_CREDENTIAL = credentials('tomcat-credential')
+			}
 			steps {
 				script {
-					sshagent(credentials : ['tomcat-cred']) {
-    					echo 'deploy'
-					}
+					sh 'ls -R'
+					sh "curl -u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} http://192.168.1.41:8888/manager/text/undeploy?path=/test"
+					sh "curl --upload-file target/Test.war -X PUT -u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} http://192.168.1.41:8888/manager/text/deploy?path=/test"
 				}
 			}
 		}

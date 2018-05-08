@@ -23,7 +23,7 @@
 		</encoder>
 	</appender>
     
-	<logger name="com.bbeauvais" additivity="false" level="INFO">
+	<logger name="com.bbeauvais.testwebapp" additivity="false" level="INFO">
 		<appender-ref ref="stdout" />
 		<appender-ref ref="rollingFile" />
 	</logger>
