@@ -35,7 +35,7 @@ pipeline {
 		}
 		stage('SonarQube Analysis'){
 			when {
-				equals expected: 'origin/master', actual: GIT_BRANCH
+				branch 'master'
 			} 
 			steps {
 				withSonarQubeEnv('my-sonarqube') {
@@ -48,7 +48,7 @@ pipeline {
 		}
 		stage('SonarQube Quality Gate'){
 			when {
-				equals expected: 'origin/master', actual: GIT_BRANCH
+				branch 'master'
 			}
 			steps {
 				script {
@@ -61,7 +61,7 @@ pipeline {
 		}
 		stage('Source publish'){
 			when {
-				equals expected: 'origin/master', actual: GIT_BRANCH
+				branch 'master'
 			}
 			steps {
 				script {
@@ -77,7 +77,7 @@ pipeline {
 		}
 		stage('Deploy'){
 			when {
-				equals expected: 'origin/master', actual: GIT_BRANCH
+				branch 'master'
 			}
 			options {
                 timeout(time: 15, unit: 'MINUTES') 
