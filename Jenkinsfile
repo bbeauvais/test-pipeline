@@ -24,7 +24,6 @@ pipeline {
 		}
 		stage('Build') {
 			steps {
-				sh 'printenv'
 				sh 'mvn clean install'
 			} 
 			post {
@@ -87,9 +86,9 @@ pipeline {
 			}
 			steps {
 				script {
-					def serverIP = "192.168.1.41:8888/manager"
+					def serverIP = "192.168.1.41:8888"
 					echo "Deploying War file to Tomcat ${serverIP}"
-					sh "curl -u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} http://${serverIP}/text/undeploy?path=/test"
+					sh "curl -u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} http://${serverIP}/manager/text/undeploy?path=/test"
 					sh "curl --upload-file target/Test.war -X PUT -u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} http://${serverIP}/manager/text/deploy?path=/test"
 				}
 			}
