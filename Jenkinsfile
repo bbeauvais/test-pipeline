@@ -40,7 +40,7 @@ pipeline {
 			steps {
 				withSonarQubeEnv('my-sonarqube') {
 					sh "mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.4.0.905:sonar " +
-						"-Dsonar.projectKey=Test-ci-cd " +
+						"-Dsonar.projectKey=Test-ci-cd-bitbucket " +
 						"-Dsonar.java.source=1.8 " +
 						"-Dsonar.jacoco.reportPaths=target/jacoco.exec "
 				}
