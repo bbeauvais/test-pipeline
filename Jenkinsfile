@@ -94,6 +94,9 @@ pipeline {
 		}
 	}
 	post {
+		always {
+			echo 'Doing reporting'
+		}
 		success {
 			script {
 				if(GIT_BRANCH == 'origin/master'){
@@ -120,6 +123,9 @@ pipeline {
 				}
 				echo "Sending email to ${targetEmail}"
 			}
+		}
+		cleanup {
+			deleteDir()
 		}
 	}
 }
