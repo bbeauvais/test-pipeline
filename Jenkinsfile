@@ -87,8 +87,10 @@ pipeline {
 			}
 			steps {
 				script {
-					sh "curl -u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} http://192.168.1.41:8888/manager/text/undeploy?path=/test"
-					sh "curl --upload-file target/Test.war -X PUT -u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} http://192.168.1.41:8888/manager/text/deploy?path=/test"
+					def serverIP = "192.168.1.41:8888/manager"
+					echo "Deploying War file to Tomcat ${serverIP}"
+					sh "curl -u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} http://${serverIP}/text/undeploy?path=/test"
+					sh "curl --upload-file target/Test.war -X PUT -u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} http://${serverIP}/manager/text/deploy?path=/test"
 				}
 			}
 		}
@@ -100,7 +102,8 @@ pipeline {
 		success {
 			script {
 				if(GIT_BRANCH == 'origin/master'){
-					slackSend color: 'good', message: "Build successfull ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+					slackSend color: 'good', 
+						message: "Build successfull ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
 				}
 			}
 		}
@@ -109,7 +112,8 @@ pipeline {
 				targetEmail = 'Last commiter'
 				if(GIT_BRANCH == 'origin/master'){
 					targetEmail = 'Team'
-					slackSend color: 'danger', message: "Build failure ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+					slackSend color: 'danger', 
+						message: "Build failure ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
 				}
 				echo "Sending email to ${targetEmail}"
 			}
@@ -119,7 +123,8 @@ pipeline {
 				targetEmail = 'Last commiter'
 				if(GIT_BRANCH == 'origin/master'){
 					targetEmail = 'Team'
-					slackSend color: 'good', message: "Build back to normal ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+					slackSend color: 'good', 
+						message: "Build back to normal ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
 				}
 				echo "Sending email to ${targetEmail}"
 			}
