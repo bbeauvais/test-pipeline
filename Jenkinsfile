@@ -24,8 +24,8 @@ pipeline {
 		}
 		stage('Build') {
 			steps {
+				sh 'printenv'
 				sh 'mvn clean install'
-				sh "ls -R"
 			} 
 			post {
 				always {
@@ -87,7 +87,6 @@ pipeline {
 			}
 			steps {
 				script {
-					sh 'ls -R'
 					sh "curl -u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} http://192.168.1.41:8888/manager/text/undeploy?path=/test"
 					sh "curl --upload-file target/Test.war -X PUT -u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} http://192.168.1.41:8888/manager/text/deploy?path=/test"
 				}
