@@ -1,3 +1,4 @@
+#!groovy
 pipeline {
 	agent any
 	tools {
@@ -9,12 +10,12 @@ pipeline {
 		buildDiscarder(logRotator(numToKeepStr : "10"))
 		disableConcurrentBuilds()
 	}
-	environment {
-		VERSION = readMavenPom().getVersion()
-		ARTIFACT_ID = readMavenPom().getArtifactId()
-	}
 	stages {
 		stage('Initialisation'){
+			environment {
+				VERSION = readMavenPom().getVersion()
+				ARTIFACT_ID = readMavenPom().getArtifactId()
+			}
 			steps {
 				echo "Starting Job ${env.BUILD_NUMBER} : \n" + 
 					"Artifact ID : ${ARTIFACT_ID} \n" + 
