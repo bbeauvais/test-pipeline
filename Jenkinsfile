@@ -53,7 +53,7 @@ pipeline {
 			steps {
 				script {
 					def qualitygate = waitForQualityGate()
-					if (qualitygate.status != "OK") {
+					if ("OK" != qualitygate.status) {
 						error "Pipeline failed due to quality gate : ${qualitygate.status}"
 					} 
 				}
@@ -111,11 +111,11 @@ pipeline {
 	}
 	post {
 		always {
-			echo 'Doing reporting'
+			echo 'Doing report'
 		}
 		success {
 			script {
-				if(GIT_BRANCH == 'master'){
+				if('master' == GIT_BRANCH){
 					slackSend color: 'good', 
 						message: "Build successfull ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
 				}
@@ -123,9 +123,9 @@ pipeline {
 		}
 		failure {
 			script {
-				targetEmail = 'Last commiter'
-				if(GIT_BRANCH == 'master'){
-					targetEmail = 'Team'
+				targetEmail = sh ( script : 'git log -1 --format=%ae $( git rev-parse HEAD )', returnStdout: true ).trim()
+				if('master' == GIT_BRANCH) {
+					targetEmail = 'team@mail.com'
 					slackSend color: 'danger', 
 						message: "Build failure ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
 				}
@@ -134,9 +134,9 @@ pipeline {
 		}
 		fixed {
 			script {
-				targetEmail = 'Last commiter'
-				if(GIT_BRANCH == 'master'){
-					targetEmail = 'Team'
+				targetEmail = sh ( script : 'git log -1 --format=%ae $( git rev-parse HEAD )', returnStdout: true ).trim()
+				if('master' == GIT_BRANCH) {
+					targetEmail = 'team@mail.com'
 					slackSend color: 'good', 
 						message: "Build back to normal ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
 				}
