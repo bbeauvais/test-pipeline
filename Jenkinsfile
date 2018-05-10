@@ -100,8 +100,10 @@ pipeline {
 						  	"http://${SERVER_IP}/manager/text/deploy?path=/test " +
 							"> status.txt"
 
-					def status = readFile 'status.txt'
-					echo "${status}"
+					def deployStatus = readFile 'status.txt'
+					if( "200" !=  deployStatus) {
+						error "Failed to deploy the War file to server ${SERVER_IP}, response status ${deployStatus}"
+					}
 				}
 			}
 		}
@@ -112,7 +114,7 @@ pipeline {
 		}
 		success {
 			script {
-				if(GIT_BRANCH == 'origin/master'){
+				if(GIT_BRANCH == 'master'){
 					slackSend color: 'good', 
 						message: "Build successfull ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
 				}
@@ -121,7 +123,7 @@ pipeline {
 		failure {
 			script {
 				targetEmail = 'Last commiter'
-				if(GIT_BRANCH == 'origin/master'){
+				if(GIT_BRANCH == 'master'){
 					targetEmail = 'Team'
 					slackSend color: 'danger', 
 						message: "Build failure ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
@@ -132,7 +134,7 @@ pipeline {
 		fixed {
 			script {
 				targetEmail = 'Last commiter'
-				if(GIT_BRANCH == 'origin/master'){
+				if(GIT_BRANCH == 'master'){
 					targetEmail = 'Team'
 					slackSend color: 'good', 
 						message: "Build back to normal ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
