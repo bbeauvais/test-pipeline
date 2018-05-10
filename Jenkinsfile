@@ -83,13 +83,25 @@ pipeline {
             }
 			environment {
 				SERVER_CREDENTIAL = credentials('tomcat-credential')
+				SERVER_IP = "192.168.1.41:8888"
 			}
 			steps {
 				script {
-					def serverIP = "192.168.1.41:8888"
-					echo "Deploying War file to Tomcat ${serverIP}"
-					sh "curl -u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} http://${serverIP}/manager/text/undeploy?path=/test"
-					sh "curl --upload-file target/Test.war -X PUT -u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} http://${serverIP}/manager/text/deploy?path=/test"
+					echo "Undeploying Webapp to Tomcat ${SERVER_IP}"
+					sh "curl " + 
+						"-u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} " +
+						"http://${SERVER_IP}/manager/text/undeploy?path=/test"
+
+					echo "Deploying War file to Tomcat ${SERVER_IP}"
+					sh "curl -X PUT " +
+							"-o /dev/null -w \"%{http_code}\" " +
+							"-u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} " +
+							"--upload-file target/Test.war " +
+						  	"http://${SERVER_IP}/manager/text/deploy?path=/test " +
+							"> status.txt"
+
+					def status = readFile 'status.txt'
+					echo "${status}"
 				}
 			}
 		}
