@@ -87,20 +87,20 @@ pipeline {
 				SERVER_IP = "192.168.1.41:8888"
 			}
 			steps {
+				echo "Undeploying Webapp to Tomcat ${SERVER_IP}"
+				sh "curl " + 
+					"-u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} " +
+					"http://${SERVER_IP}/manager/text/undeploy?path=/test"
+
+				echo "Deploying War file to Tomcat ${SERVER_IP}"
+				sh "curl -X PUT " +
+					"-o /dev/null -w \"%{http_code}\" " +
+					"-u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} " +
+					"--upload-file target/Test.war " +
+				  	"http://${SERVER_IP}/manager/text/deploy?path=/test " +
+					"> status.txt"
+					
 				script {
-					echo "Undeploying Webapp to Tomcat ${SERVER_IP}"
-					sh "curl " + 
-						"-u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} " +
-						"http://${SERVER_IP}/manager/text/undeploy?path=/test"
-
-					echo "Deploying War file to Tomcat ${SERVER_IP}"
-					sh "curl -X PUT " +
-							"-o /dev/null -w \"%{http_code}\" " +
-							"-u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} " +
-							"--upload-file target/Test.war " +
-						  	"http://${SERVER_IP}/manager/text/deploy?path=/test " +
-							"> status.txt"
-
 					def deployStatus = readFile 'status.txt'
 					if( "200" !=  deployStatus) {
 						error "Failed to deploy the War file to server ${SERVER_IP}, response status ${deployStatus}"
