@@ -133,9 +133,7 @@ pipeline {
 				branch 'master'
 			}
 			steps {
-				script {
-
-				}
+				echo "Publishing release ${NEXT_RELEASE_VERSION}"				
 			}
 		}
 		stage('Deploy release'){
