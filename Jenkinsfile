@@ -117,7 +117,7 @@ pipeline {
 				script {
 					input message : "Next release version (current ${VERSION}) : "
 				}
-				echo "Publishing release ${PERSON}"				
+				// echo "Publishing release ${PERSON}"				
 			}
 		}
 		stage('Deploy release'){
