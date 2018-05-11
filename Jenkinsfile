@@ -114,10 +114,11 @@ pipeline {
 				branch 'master'
 			}
 			steps {
-				script {
-					input message : "Next release version (current ${VERSION}) : "
-				}
-				// echo "Publishing release ${PERSON}"				
+				// script {
+				// 	input message : "Next release version (current ${VERSION}) : "
+				// }
+				// echo "Publishing release ${PERSON}"
+				sh 'vi next-release-version.tmp'				
 			}
 		}
 		stage('Deploy release'){
