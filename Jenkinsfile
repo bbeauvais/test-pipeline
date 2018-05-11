@@ -1,21 +1,22 @@
 #!groovy
 pipeline {
-	agent any
+	agent none
 	tools {
 		maven 'Maven 3'
 	}
 	options {
-		timeout(time: 1, unit: 'HOURS')
+		timeout(time: 90, unit: 'MINUTES')
 		skipStagesAfterUnstable()
 		buildDiscarder(logRotator(numToKeepStr : "10"))
 		disableConcurrentBuilds()
 	}
+	environment {
+		VERSION = readMavenPom().getVersion()
+		ARTIFACT_ID = readMavenPom().getArtifactId()
+	}
 	stages {
 		stage('Initialisation'){
-			environment {
-				VERSION = readMavenPom().getVersion()
-				ARTIFACT_ID = readMavenPom().getArtifactId()
-			}
+			agent any
 			steps {
 				echo "Starting Job ${env.BUILD_NUMBER} : \n" + 
 					"Artifact ID : ${ARTIFACT_ID} \n" + 
@@ -24,6 +25,7 @@ pipeline {
 			}
 		}
 		stage('Build') {
+			agent any
 			steps {
 				sh 'mvn clean install'
 			} 
@@ -34,8 +36,9 @@ pipeline {
 			}
 		}
 		stage('SonarQube Analysis'){
+			agent any
 			when {
-				branch 'master'
+				anyOf{ branch 'master'; branch 'develop' }
 			} 
 			steps {
 				withSonarQubeEnv('my-sonarqube') {
@@ -47,8 +50,9 @@ pipeline {
 			}
 		}
 		stage('SonarQube Quality Gate'){
+			agent any
 			when {
-				branch 'master'
+				anyOf{ branch 'master'; branch 'develop' }
 			}
 			steps {
 				script {
@@ -59,9 +63,10 @@ pipeline {
 				}
 			}
 		}
-		stage('Source publish'){
+		stage('Publish Snapshot'){
+			agent any
 			when {
-				branch 'master'
+				branch 'develop'
 			}
 			steps {
 				script {
@@ -75,37 +80,74 @@ pipeline {
 				}
 			}
 		}
-		stage('Deploy'){
+		stage('Deploy Staging'){
+			agent any
+			when {
+				branch 'develop'
+			}
+			options {
+                timeout(time: 15, unit: 'MINUTES') 
+            }
+			environment {
+				STAGING_SERVER_CREDENTIAL = credentials('tomcat-credential')
+				STAGING_SERVER_IP = '192.168.1.41:8888'
+			}
+			steps {
+				script {
+					echo "Undeploying Webapp to Tomcat ${SERVER_IP}"
+					sh "curl " + 
+						"-u ${STAGING_SERVER_CREDENTIAL_USR}:${STAGING_SERVER_CREDENTIAL_PSW} " +
+						"http://${STAGING_SERVER_IP}/manager/text/undeploy?path=/test"
+
+					echo "Deploying War file to Tomcat ${SERVER_IP}"
+					sh "curl -X PUT " +
+						"-o /dev/null -w \"%{http_code}\" " +
+						"-u ${STAGING_SERVER_CREDENTIALL_USR}:${STAGING_SERVER_CREDENTIAL_PSW} " +
+						"--upload-file target/Test.war " +
+						"http://${STAGING_SERVER_IP}/manager/text/deploy?path=/test " +
+						"> status.txt"
+					
+				
+					def deployStatus = readFile 'status.txt'
+					if( "200" !=  deployStatus) {
+						error "Failed to deploy the War file to server ${SERVER_IP}, response status ${deployStatus}"
+					}
+				}
+			}
+		}
+		stage('Next release version') {
+			agent none
+			when {
+				branch 'master'
+			}
+			options {
+				timeout(time: 15, unit: 'MINUTES')
+			}
+			steps {
+				env.NEXT_RELEASE_VERSION = input message : "Nouvelle release version (actuel ${VERSION}) : " 
+			}
+		}
+		stage('Publish release'){
+			agent any
+			when {
+				branch 'master'
+			}
+			steps {
+				script {
+
+				}
+			}
+		}
+		stage('Deploy release'){
+			agent any
 			when {
 				branch 'master'
 			}
 			options {
                 timeout(time: 15, unit: 'MINUTES') 
             }
-			environment {
-				SERVER_CREDENTIAL = credentials('tomcat-credential')
-				SERVER_IP = "192.168.1.41:8888"
-			}
 			steps {
-				echo "Undeploying Webapp to Tomcat ${SERVER_IP}"
-				sh "curl " + 
-					"-u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} " +
-					"http://${SERVER_IP}/manager/text/undeploy?path=/test"
-
-				echo "Deploying War file to Tomcat ${SERVER_IP}"
-				sh "curl -X PUT " +
-					"-o /dev/null -w \"%{http_code}\" " +
-					"-u ${SERVER_CREDENTIAL_USR}:${SERVER_CREDENTIAL_PSW} " +
-					"--upload-file target/Test.war " +
-				  	"http://${SERVER_IP}/manager/text/deploy?path=/test " +
-					"> status.txt"
-					
-				script {
-					def deployStatus = readFile 'status.txt'
-					if( "200" !=  deployStatus) {
-						error "Failed to deploy the War file to server ${SERVER_IP}, response status ${deployStatus}"
-					}
-				}
+				echo 'Deploy to release staging'
 			}
 		}
 	}
