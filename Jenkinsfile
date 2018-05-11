@@ -111,16 +111,21 @@ pipeline {
 		}
 		stage('Publish release'){
 			when {
+				beforeAgent true
 				branch 'master'
 			}
+			input {
+                message "Should we continue?"
+                ok "Yes, we should."
+                parameters {
+                    string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
+                }
+            }
 			steps {
 				// script {
 				// 	input message : "Next release version (current ${VERSION}) : "
 				// }
-				// echo "Publishing release ${PERSON}"
-				script {
-					sh 'read myvar'
-				}
+				echo "Publishing release ${PERSON}"
 			}
 		}
 		stage('Deploy release'){
