@@ -124,7 +124,9 @@ pipeline {
 				timeout(time: 15, unit: 'MINUTES')
 			}
 			steps {
-				env.NEXT_RELEASE_VERSION = input message : "Nouvelle release version (actuel ${VERSION}) : " 
+				script {
+					env.NEXT_RELEASE_VERSION = input message : "Nouvelle release version (actuel ${VERSION}) : " 
+				}
 			}
 		}
 		stage('Publish release'){
