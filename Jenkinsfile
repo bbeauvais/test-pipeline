@@ -21,6 +21,8 @@ pipeline {
 					"Artifact ID : ${ARTIFACT_ID} \n" + 
 					"Version ${VERSION} \n" +
 					"Branch ${GIT_BRANCH}"
+
+				sh "printenv"
 			}
 		}
 		stage('Build') {
