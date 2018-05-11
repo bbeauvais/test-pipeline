@@ -96,7 +96,7 @@ pipeline {
 					echo "Deploying War file to Tomcat ${STAGING_SERVER_IP}"
 					sh "curl -X PUT " +
 						"-o /dev/null -w \"%{http_code}\" " +
-						"-u ${STAGING_SERVER_CREDENTIALL_USR}:${STAGING_SERVER_CREDENTIAL_PSW} " +
+						"-u ${STAGING_SERVER_CREDENTIAL_USR}:${STAGING_SERVER_CREDENTIAL_PSW} " +
 						"--upload-file target/Test.war " +
 						"http://${STAGING_SERVER_IP}/manager/text/deploy?path=/test " +
 						"> status.txt"
