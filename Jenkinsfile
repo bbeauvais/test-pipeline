@@ -1,6 +1,6 @@
 #!groovy
 pipeline {
-	agent any
+	agent none
 	tools {
 		maven 'Maven 3'
 	}
@@ -16,6 +16,7 @@ pipeline {
 	}
 	stages {
 		stage('Initialisation'){
+			agent any
 			steps {
 				echo "Starting Job ${env.BUILD_NUMBER} : \n" + 
 					"Artifact ID : ${ARTIFACT_ID} \n" + 
@@ -24,6 +25,7 @@ pipeline {
 			}
 		}
 		stage('Build') {
+			agent any
 			steps {
 				sh 'mvn clean install'
 			} 
@@ -34,6 +36,7 @@ pipeline {
 			}
 		}
 		stage('SonarQube Analysis'){
+			agent any
 			when {
 				anyOf{ branch 'master'; branch 'develop' }
 			} 
@@ -47,6 +50,7 @@ pipeline {
 			}
 		}
 		stage('SonarQube Quality Gate'){
+			agent any
 			when {
 				anyOf{ branch 'master'; branch 'develop' }
 			}
@@ -60,6 +64,7 @@ pipeline {
 			}
 		}
 		stage('Publish Snapshot'){
+			agent any
 			when {
 				branch 'develop'
 			}
@@ -76,6 +81,7 @@ pipeline {
 			}
 		}
 		stage('Deploy Staging'){
+			agent any
 			when {
 				branch 'develop'
 			}
@@ -110,25 +116,27 @@ pipeline {
 			}
 		}
 		stage('Publish release'){
+			agent none
 			when {
 				branch 'master'
 			}
-			input {
-                message "Should we continue?"
-                ok "Yes, we should."
-                parameters {
-                    string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
-                }
-            }
+			// input {
+            //     message "Should we continue?"
+            //     ok "Yes, we should."
+            //     parameters {
+            //         string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
+            //     }
+            // }
 			steps {
-				// script {
-				// 	input message : "Next release version (current ${VERSION}) : "
-				// 		parameters : { string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?') }
-				// }
+				script {
+					input message : "Next release version (current ${VERSION}) : "
+						parameters : { string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?') }
+				}
 				echo "Publishing release ${PERSON}"				
 			}
 		}
 		stage('Deploy release'){
+			agent any
 			when {
 				branch 'master'
 			}
