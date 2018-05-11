@@ -1,6 +1,6 @@
 #!groovy
 pipeline {
-	agent none
+	agent any
 	tools {
 		maven 'Maven 3'
 	}
@@ -10,14 +10,13 @@ pipeline {
 		buildDiscarder(logRotator(numToKeepStr : "10"))
 		disableConcurrentBuilds()
 	}
+	environment {
+		VERSION = readMavenPom().getVersion()
+		ARTIFACT_ID = readMavenPom().getArtifactId()
+	}
 	stages {
 		stage('Initialisation'){
-			agent any
 			steps {
-				script {
-					env.VERSION = readMavenPom().getVersion()
-					env.ARTIFACT_ID = readMavenPom().getArtifactId()
-				}
 				echo "Starting Job ${env.BUILD_NUMBER} : \n" + 
 					"Artifact ID : ${ARTIFACT_ID} \n" + 
 					"Version ${VERSION} \n" +
@@ -25,7 +24,6 @@ pipeline {
 			}
 		}
 		stage('Build') {
-			agent any
 			steps {
 				sh 'mvn clean install'
 			} 
@@ -36,7 +34,6 @@ pipeline {
 			}
 		}
 		stage('SonarQube Analysis'){
-			agent any
 			when {
 				anyOf{ branch 'master'; branch 'develop' }
 			} 
@@ -50,7 +47,6 @@ pipeline {
 			}
 		}
 		stage('SonarQube Quality Gate'){
-			agent any
 			when {
 				anyOf{ branch 'master'; branch 'develop' }
 			}
@@ -64,7 +60,6 @@ pipeline {
 			}
 		}
 		stage('Publish Snapshot'){
-			agent any
 			when {
 				branch 'develop'
 			}
@@ -81,7 +76,6 @@ pipeline {
 			}
 		}
 		stage('Deploy Staging'){
-			agent any
 			when {
 				branch 'develop'
 			}
@@ -115,31 +109,15 @@ pipeline {
 				}
 			}
 		}
-		stage('Next release version') {
-			agent none
-			when {
-				branch 'master'
-			}
-			options {
-				timeout(time: 15, unit: 'MINUTES')
-			}
-			steps {
-				script {
-					env.NEXT_RELEASE_VERSION = input message : "Nouvelle release version (actuel ${VERSION}) : " 
-				}
-			}
-		}
 		stage('Publish release'){
-			agent any
 			when {
 				branch 'master'
 			}
 			steps {
-				echo "Publishing release ${NEXT_RELEASE_VERSION}"				
+				echo "Publishing release"				
 			}
 		}
 		stage('Deploy release'){
-			agent any
 			when {
 				branch 'master'
 			}
