@@ -88,12 +88,12 @@ pipeline {
 			}
 			steps {
 				script {
-					echo "Undeploying Webapp to Tomcat ${SERVER_IP}"
+					echo "Undeploying Webapp to Tomcat ${STAGING_SERVER_IP}"
 					sh "curl " + 
 						"-u ${STAGING_SERVER_CREDENTIAL_USR}:${STAGING_SERVER_CREDENTIAL_PSW} " +
 						"http://${STAGING_SERVER_IP}/manager/text/undeploy?path=/test"
 
-					echo "Deploying War file to Tomcat ${SERVER_IP}"
+					echo "Deploying War file to Tomcat ${STAGING_SERVER_IP}"
 					sh "curl -X PUT " +
 						"-o /dev/null -w \"%{http_code}\" " +
 						"-u ${STAGING_SERVER_CREDENTIALL_USR}:${STAGING_SERVER_CREDENTIAL_PSW} " +
