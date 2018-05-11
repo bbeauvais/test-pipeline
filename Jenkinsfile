@@ -119,7 +119,7 @@ pipeline {
 				// }
 				// echo "Publishing release ${PERSON}"
 				script {
-					sh 'vi next-release-version.tmp'
+					sh 'read myvar'
 				}
 			}
 		}
