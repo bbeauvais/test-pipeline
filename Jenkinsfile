@@ -115,8 +115,7 @@ pipeline {
 			}
 			steps {
 				script {
-					input message : "Next release version (current ${VERSION}) : ",
-						parameters : { string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?') }
+					input message : "Next release version (current ${VERSION}) : "
 				}
 				echo "Publishing release ${PERSON}"				
 			}
