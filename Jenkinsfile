@@ -114,7 +114,10 @@ pipeline {
 				branch 'master'
 			}
 			steps {
-				echo "Publishing release"				
+				script {
+					env.NEXT_RELEASE_VERSION = input message : "Next release version (current ${VERSION}) :"
+				}
+				echo "Publishing release ${NEXT_RELEASE_VERSION}"				
 			}
 		}
 		stage('Deploy release'){
