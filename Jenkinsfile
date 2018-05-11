@@ -115,9 +115,10 @@ pipeline {
 			}
 			steps {
 				script {
-					env.NEXT_RELEASE_VERSION = input message : "Next release version (current ${VERSION}) :"
+					input message : "Next release version (current ${VERSION}) : ",
+						parameters {  string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?') }
 				}
-				echo "Publishing release ${NEXT_RELEASE_VERSION}"				
+				echo "Publishing release ${PERSON}"				
 			}
 		}
 		stage('Deploy release'){
