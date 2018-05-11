@@ -10,14 +10,14 @@ pipeline {
 		buildDiscarder(logRotator(numToKeepStr : "10"))
 		disableConcurrentBuilds()
 	}
-	environment {
-		VERSION = readMavenPom().getVersion()
-		ARTIFACT_ID = readMavenPom().getArtifactId()
-	}
 	stages {
 		stage('Initialisation'){
 			agent any
 			steps {
+				script {
+					env.VERSION = readMavenPom().getVersion()
+					env.ARTIFACT_ID = readMavenPom().getArtifactId()
+				}
 				echo "Starting Job ${env.BUILD_NUMBER} : \n" + 
 					"Artifact ID : ${ARTIFACT_ID} \n" + 
 					"Version ${VERSION} \n" +
