@@ -111,26 +111,17 @@ pipeline {
 		}
 		stage('Publish release'){
 			when {
-				beforeAgent true
 				branch 'master'
+				buildingTag()
 			}
-			input {
-                message "Should we continue?"
-                ok "Yes, we should."
-                parameters {
-                    string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
-                }
-            }
 			steps {
-				// script {
-				// 	input message : "Next release version (current ${VERSION}) : "
-				// }
 				echo "Publishing release ${PERSON}"
 			}
 		}
 		stage('Deploy release'){
 			when {
 				branch 'master'
+				buildingTag()
 			}
 			options {
                 timeout(time: 15, unit: 'MINUTES') 
