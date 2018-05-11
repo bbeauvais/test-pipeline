@@ -114,7 +114,7 @@ pipeline {
 		stage('Publish release'){
 			when {
 				branch 'master'
-				buildingTag()
+				// buildingTag()
 			}
 			steps {
 				echo "Publishing release ${PERSON}"
@@ -123,7 +123,7 @@ pipeline {
 		stage('Deploy release'){
 			when {
 				branch 'master'
-				buildingTag()
+				// buildingTag()
 			}
 			options {
                 timeout(time: 15, unit: 'MINUTES') 
