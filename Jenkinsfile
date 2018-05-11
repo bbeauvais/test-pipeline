@@ -118,7 +118,9 @@ pipeline {
 				// 	input message : "Next release version (current ${VERSION}) : "
 				// }
 				// echo "Publishing release ${PERSON}"
-				sh 'vi next-release-version.tmp'				
+				script {
+					sh 'vi next-release-version.tmp'
+				}
 			}
 		}
 		stage('Deploy release'){
