@@ -117,7 +117,7 @@ pipeline {
 				// buildingTag()
 			}
 			steps {
-				echo "Publishing release ${PERSON}"
+				echo "Publishing release"
 			}
 		}
 		stage('Deploy release'){
