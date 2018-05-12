@@ -7,7 +7,7 @@ pipeline {
 	options {
 		timeout(time: 90, unit: 'MINUTES')
 		skipStagesAfterUnstable()
-		buildDiscarder(logRotator(numToKeepStr : "10"))
+		buildDiscarder(logRotator(numToKeepStr : '10'))
 		disableConcurrentBuilds()
 	}
 	environment {
@@ -21,8 +21,6 @@ pipeline {
 					"Artifact ID : ${ARTIFACT_ID} \n" + 
 					"Version ${VERSION} \n" +
 					"Branch ${GIT_BRANCH}"
-
-				sh "printenv"
 			}
 		}
 		stage('Build') {
@@ -41,10 +39,10 @@ pipeline {
 			} 
 			steps {
 				withSonarQubeEnv('my-sonarqube') {
-					sh "mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.4.0.905:sonar " +
-						"-Dsonar.projectKey=Test-ci-cd-bitbucket " +
-						"-Dsonar.java.source=1.8 " +
-						"-Dsonar.jacoco.reportPaths=target/jacoco.exec "
+					sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.4.0.905:sonar ' +
+						'-Dsonar.projectKey=Test-ci-cd-bitbucket ' +
+						'-Dsonar.java.source=1.8 ' +
+						'-Dsonar.jacoco.reportPaths=target/jacoco.exec '
 				}
 			}
 		}
@@ -54,7 +52,7 @@ pipeline {
 			}
 			steps {
 				script {
-					def qualitygate = waitForQualityGate()
+					String qualitygate = waitForQualityGate()
 					if ("OK" != qualitygate.status) {
 						error "Pipeline failed due to quality gate : ${qualitygate.status}"
 					} 
@@ -66,6 +64,7 @@ pipeline {
 				branch 'develop'
 			}
 			steps {
+				echo "Publishing Snapshot ${VERSION}"
 				script {
 					def artifactoryServer = Artifactory.server('my-artifactory')
 					def mavenBuild = Artifactory.newMavenBuild()
@@ -89,22 +88,22 @@ pipeline {
 				STAGING_SERVER_IP = '192.168.1.41:8888'
 			}
 			steps {
-				script {
 					echo "Undeploying Webapp to Tomcat ${STAGING_SERVER_IP}"
 					sh "curl " + 
 						"-u ${STAGING_SERVER_CREDENTIAL_USR}:${STAGING_SERVER_CREDENTIAL_PSW} " +
 						"http://${STAGING_SERVER_IP}/manager/text/undeploy?path=/test"
 
+				script {
 					echo "Deploying War file to Tomcat ${STAGING_SERVER_IP}"
-					sh "curl -X PUT " +
-						"-o /dev/null -w \"%{http_code}\" " +
-						"-u ${STAGING_SERVER_CREDENTIAL_USR}:${STAGING_SERVER_CREDENTIAL_PSW} " +
-						"--upload-file target/Test.war " +
-						"http://${STAGING_SERVER_IP}/manager/text/deploy?path=/test " +
-						"> status.txt"
+					String deployStatus = sh message : "curl -X PUT " +
+													"-o /dev/null -w \"%{http_code}\" " +
+													"-u ${STAGING_SERVER_CREDENTIAL_USR}:${STAGING_SERVER_CREDENTIAL_PSW} " +
+													"--upload-file target/Test.war " +
+													"http://${STAGING_SERVER_IP}/manager/text/deploy?path=/test",
+										returnStdout: true
 					
 				
-					def deployStatus = readFile 'status.txt'
+					// def deployStatus = readFile 'status.txt'
 					if( "200" !=  deployStatus) {
 						error "Failed to deploy the War file to server ${SERVER_IP}, response status ${deployStatus}"
 					}
@@ -117,8 +116,16 @@ pipeline {
 			}
 			steps {
 				script {
-					lastTag = sh ( script : 'git describe', returnStdout: true ).trim()
-					echo "Publishing release ${lastTag}"
+					String lastTag = sh ( script : 'git describe', returnStdout: true ).trim()
+					echo "Publishing release version : ${VERSION}, on Tag : ${lastTag}"
+
+					def artifactoryServer = Artifactory.server('my-artifactory')
+					def mavenBuild = Artifactory.newMavenBuild()
+					mavenBuild.resolver server: artifactoryServer, releaseRepo: 'libs-release', snapshotRepo: 'libs-snapshot'
+					mavenBuild.deployer server: artifactoryServer, releaseRepo: 'libs-release-local', snapshotRepo: 'libs-snapshot-local'
+					mavenBuild.tool = 'Maven 3'
+					def buildInfo = mavenBuild.run pom: 'pom.xml', goals: 'clean install'
+					artifactoryServer.publishBuildInfo buildInfo
 				}
 			}
 		}
@@ -140,7 +147,7 @@ pipeline {
 		}
 		success {
 			script {
-				if('master' == GIT_BRANCH){
+				if(['master', 'develop'].contains(GIT_BRANCH)){
 					slackSend color: 'good', 
 						message: "Build successfull ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
 				}
@@ -148,8 +155,8 @@ pipeline {
 		}
 		failure {
 			script {
-				targetEmail = sh ( script : 'git log -1 --format=%ae $( git rev-parse HEAD )', returnStdout: true ).trim()
-				if('master' == GIT_BRANCH) {
+				String targetEmail = sh ( script : 'git log -1 --format=%ae $( git rev-parse HEAD )', returnStdout: true ).trim()
+				if(['master', 'develop'].contains(GIT_BRANCH)) {
 					targetEmail = 'team@mail.com'
 					slackSend color: 'danger', 
 						message: "Build failure ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
@@ -159,8 +166,8 @@ pipeline {
 		}
 		fixed {
 			script {
-				targetEmail = sh ( script : 'git log -1 --format=%ae $( git rev-parse HEAD )', returnStdout: true ).trim()
-				if('master' == GIT_BRANCH) {
+				String targetEmail = sh ( script : 'git log -1 --format=%ae $( git rev-parse HEAD )', returnStdout: true ).trim()
+				if(['master', 'develop'].contains(GIT_BRANCH)) {
 					targetEmail = 'team@mail.com'
 					slackSend color: 'good', 
 						message: "Build back to normal ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
