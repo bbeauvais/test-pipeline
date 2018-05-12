@@ -70,8 +70,13 @@ pipeline {
 				branch 'develop'
 			}
 			steps {
-				echo "Publishing Snapshot ${VERSION}"
 				script {
+					if(!env.VERSION.contains('SNAPSHOT')){
+						error "Pipeline failure, version must be a SNAPSHOT"
+					}
+
+					echo "Publishing Snapshot ${VERSION}"
+
 					// Retrievning the Artifactory server configured in Jenkins
 					def artifactoryServer = Artifactory.server('my-artifactory')
 					def mavenBuild = Artifactory.newMavenBuild()
