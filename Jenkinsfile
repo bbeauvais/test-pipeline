@@ -114,16 +114,15 @@ pipeline {
 		stage('Publish release'){
 			when {
 				branch 'master'
-				buildingTag()
 			}
 			steps {
-				echo "Publishing release"
+				lastTag = sh ( script : 'git describe', returnStdout: true ).trim()
+				echo "Publishing release ${lastTag}"
 			}
 		}
 		stage('Deploy release'){
 			when {
 				branch 'master'
-				buildingTag()
 			}
 			options {
                 timeout(time: 15, unit: 'MINUTES') 
