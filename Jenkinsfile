@@ -52,7 +52,7 @@ pipeline {
 			}
 			steps {
 				script {
-					String qualitygate = waitForQualityGate()
+					def qualitygate = waitForQualityGate()
 					if ("OK" != qualitygate.status) {
 						error "Pipeline failed due to quality gate : ${qualitygate.status}"
 					} 
