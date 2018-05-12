@@ -116,8 +116,10 @@ pipeline {
 				branch 'master'
 			}
 			steps {
-				lastTag = sh ( script : 'git describe', returnStdout: true ).trim()
-				echo "Publishing release ${lastTag}"
+				script {
+					lastTag = sh ( script : 'git describe', returnStdout: true ).trim()
+					echo "Publishing release ${lastTag}"
+				}
 			}
 		}
 		stage('Deploy release'){
