@@ -116,7 +116,15 @@ pipeline {
 			}
 			steps {
 				script {
+					if(env.VERSION.contains("SNAPSHOT")){
+						error "Pipeline failure, master shouldn\'t contains SNAPSHOT version"
+					}
 					String lastTag = sh ( script : 'git describe', returnStdout: true ).trim()
+
+					if(env.VERSION != lastTag){
+						error "Pipeline failure, releasing on version ${VERSION} different than Tag ${lastTag}"
+					}
+
 					echo "Publishing release version : ${VERSION}, on Tag : ${lastTag}"
 
 					def artifactoryServer = Artifactory.server('my-artifactory')
