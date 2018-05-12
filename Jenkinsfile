@@ -1,4 +1,4 @@
-#!groovy
+#!/usr/bin/env groovy
 pipeline {
 	agent any
 	tools {
@@ -101,23 +101,23 @@ pipeline {
 				echo "Undeploying Webapp to Tomcat test environment ${TEST_SERVER_IP}"
 				// Using an HTTP request to undeploy the web application on the server path
 				sh "curl " + 
-					"-u ${TEST_SERVER_CREDENTIAL_USR}:${TEST_SERVER_CREDENTIAL_PSW} " +
-					"http://${TEST_SERVER_IP}/manager/text/undeploy?path=/test"
+						"-u ${TEST_SERVER_CREDENTIAL_USR}:${TEST_SERVER_CREDENTIAL_PSW} " +
+						"http://${TEST_SERVER_IP}/manager/text/undeploy?path=/test"
 
-				script {
-					echo "Deploying War file to Tomcat test environment ${TEST_SERVER_IP}"
-					// Using an HTTP request to deploy the web application on the server path
-					// Aditionnal parameter are for filtering the return code status and store it in a tmp file
-					sh "curl -X PUT " +
-							"-o /dev/null -w \"%{http_code}\" " +
-							"-u ${TEST_SERVER_CREDENTIAL_USR}:${TEST_SERVER_CREDENTIAL_PSW} " +
-							"--upload-file target/Test.war " +
-							"http://${TEST_SERVER_IP}/manager/text/deploy?path=/test " +
-							" > status.tmp"
+				echo "Deploying War file to Tomcat test environment ${TEST_SERVER_IP}"
+				// Using an HTTP request to deploy the web application on the server path
+				// Aditionnal parameter are for filtering the return code status and store it in a tmp file
+				sh "curl -X PUT " +
+						"-o /dev/null -w \"%{http_code}\" " +
+						"-u ${TEST_SERVER_CREDENTIAL_USR}:${TEST_SERVER_CREDENTIAL_PSW} " +
+						"--upload-file target/Test.war " +
+						"http://${TEST_SERVER_IP}/manager/text/deploy?path=/test " +
+						" > status.tmp"
 					
+				script {
 					// Check if the deployment is successfull
-					def deployStatus = readFile 'status.tmp'
-					if( "200" !=  deployStatus) {
+					String deployStatus = readFile 'status.tmp'
+					if( '200' !=  deployStatus) {
 						error "Failed to deploy the War file to server test environment ${TEST_SERVER_IP}, response status ${deployStatus}"
 					}
 				}
@@ -172,26 +172,27 @@ pipeline {
 				STAGING_SERVER_IP = '192.168.1.41:8888'
 			}
 			steps {
-				echo "Undeploying Webapp to Tomcat ${TEST_SERVER_IP}"
+				echo "Undeploying Webapp to Tomcat ${STAGING_SERVER_IP}"
 				// Using an HTTP request to undeploy the web application on the server path
 				sh "curl " + 
-					"-u ${STAGING_SERVER_CREDENTIAL_USR}:${STAGING_SERVER_CREDENTIAL_PSW} " +
-					"http://${STAGING_SERVER_IP}/manager/text/undeploy?path=/test"
+						"-u ${STAGING_SERVER_CREDENTIAL_USR}:${STAGING_SERVER_CREDENTIAL_PSW} " +
+						"http://${STAGING_SERVER_IP}/manager/text/undeploy?path=/test"
 
-				script {
-					echo "Deploying War file to Tomcat ${TEST_SERVER_IP}"
-					// Using an HTTP request to deploy the web application on the server path
-					// Aditionnal parameter are for filtering the return code status and store it in a tmp file
-					sh "curl -X PUT " +
-							"-o /dev/null -w \"%{http_code}\" " +
-							"-u ${STAGING_SERVER_CREDENTIAL_USR}:${STAGING_SERVER_CREDENTIAL_PSW} " +
-							"--upload-file target/Test.war " +
-							"http://${STAGING_SERVER_IP}/manager/text/deploy?path=/test " +
-							" > status.tmp"
-					
+				
+				echo "Deploying War file to Tomcat ${STAGING_SERVER_IP}"
+				// Using an HTTP request to deploy the web application on the server path
+				// Aditionnal parameter are for filtering the return code status and store it in a tmp file
+				sh "curl -X PUT " +
+						"-o /dev/null -w \"%{http_code}\" " +
+						"-u ${STAGING_SERVER_CREDENTIAL_USR}:${STAGING_SERVER_CREDENTIAL_PSW} " +
+						"--upload-file target/Test.war " +
+						"http://${STAGING_SERVER_IP}/manager/text/deploy?path=/test " +
+						" > status.tmp"
+
+				script {	
 					// Check if the deployment is successfull
-					def deployStatus = readFile 'status.tmp'
-					if( "200" !=  deployStatus) {
+					String deployStatus = readFile 'status.tmp'
+					if( '200' !=  deployStatus) {
 						error "Failed to deploy the War file to staging server ${STAGING_SERVER_IP}, response status ${deployStatus}"
 					}
 				}
