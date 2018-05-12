@@ -8,7 +8,7 @@ pipeline {
 		timeout(time: 90, unit: 'MINUTES') // Make the pipeline fail after 90 minutes
 		skipStagesAfterUnstable() // Every step after the build goes to unstable stage are ignored
 		buildDiscarder(logRotator(numToKeepStr : '10')) // Keep on the last 10 build on Jenkins
-		disableConcurrentBuilds() // Block the execution of the same pipeline in parralel
+		disableConcurrentBuilds() // Block the execution of the same pipeline in parrallel
 	}
 	environment {
 		VERSION = readMavenPom().getVersion()
@@ -173,7 +173,7 @@ pipeline {
                 timeout(time: 15, unit: 'MINUTES') 
             }
 			environment {
-				STAGING_SERVER_CREDENTIAL = credentials('tomcat-credential')
+				STAGING_SERVER_CREDENTIAL = credentials('tomcat-staging-credential')
 				STAGING_SERVER_IP = '192.168.1.41:8888'
 			}
 			steps {
