@@ -39,8 +39,8 @@ public class TestWebAppContextListenerTest {
 
 		testedObject.contextInitialized(contextEventMock);
 
-		verify(servletContextMock, times(1)).addServlet(anyString(), any(Class.class));
-		verify(dynamicMock, times(1)).addMapping(any());
+		verify(servletContextMock, times(2)).addServlet(anyString(), any(Class.class));
+		verify(dynamicMock, times(2)).addMapping(any());
 	}
 
 	@Test

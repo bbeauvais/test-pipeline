@@ -10,18 +10,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TestServlet extends HttpServlet {
+public class CoucouServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(TestServlet.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CoucouServlet.class);
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		Integer status = 200;
 		
 		try {
-			resp.getWriter().println("Hello world");
+			resp.getWriter().println("Coucou");
 		} catch (IOException e) {
 			LOGGER.error(e.getLocalizedMessage());
 			status = 500;
@@ -29,6 +28,6 @@ public class TestServlet extends HttpServlet {
 		
 		resp.setStatus(status);
 	}
-
 	
+
 }
