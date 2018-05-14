@@ -100,7 +100,7 @@ pipeline {
             }
 			environment {
 				TEST_SERVER_CREDENTIAL = credentials('tomcat-credential') // Retrieve the credentials configured in Jenkins and add then to the env for the stage
-				TEST_SERVER_IP = '192.168.1.41:8888'
+				TEST_SERVER_IP = '192.168.202.46:8888'
 			}
 			steps {
 				echo "Undeploying Webapp to Tomcat test environment ${TEST_SERVER_IP}"
@@ -174,7 +174,7 @@ pipeline {
             }
 			environment {
 				STAGING_SERVER_CREDENTIAL = credentials('tomcat-staging-credential')
-				STAGING_SERVER_IP = '192.168.1.41:8888'
+				STAGING_SERVER_IP = '192.168.202.46:8888'
 			}
 			steps {
 				echo "Undeploying Webapp to Tomcat ${STAGING_SERVER_IP}"
